@@ -1,4 +1,11 @@
 {
+  "name": "webapp-express",
+  "version": "1.0.0",
+  "author": "Matteo Cipolla",
+  "scripts": {
+    "start": "node --env-file=.env app.js",
+    "watch": "node --env-file=.env --watch app.js"
+  },
   "dependencies": {
     "express": "^4.21.2"
   }
