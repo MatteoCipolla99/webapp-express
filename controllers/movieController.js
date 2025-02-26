@@ -32,7 +32,7 @@ const show = (req, res) => {
     if (err) {
       return res.status(500).json({
         error: "Query Error",
-        message: `Database query failed ${sql}`,
+        message: `Database query failed ${movieSql}`,
       });
     }
     //recupero il film dall'array dei risultati
