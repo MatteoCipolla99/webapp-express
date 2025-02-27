@@ -13,7 +13,12 @@ const index = (req, res) => {
       });
     }
 
-    res.json(results);
+    const movies = results.map((movie) => {
+      movie.image = `http://localhost:3000/movies/${movie.image}`;
+      return movie;
+    });
+
+    res.json(movies);
   });
 };
 
