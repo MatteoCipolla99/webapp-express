@@ -4,6 +4,7 @@ const connection = require("../data/db");
 //Index
 const index = (req, res) => {
   const sql = "SELECT * FROM movies";
+
   //lancio la query
   connection.execute(sql, (err, results) => {
     if (err) {
@@ -27,10 +28,16 @@ const show = (req, res) => {
   //recupero l'id dalla rotta
   const { id } = req.params;
 
+  // const movieSql = `
+  //   SELECT *
+  //   FROM movies
+  //   WHERE id = ?`;
   const movieSql = `
-    SELECT * 
+    SELECT movies.*, ROUND(AVG(reviews.vote))
     FROM movies
-    WHERE id = ?`;
+    LEFT JOIN reviews ON movies.id = reviews.movie_id
+    WHERE movies.id = ?
+    GROUP BY movies.id`;
 
   //lancio la query preparata per leggere il film con id ?
   connection.execute(movieSql, [id], (err, results) => {
@@ -49,6 +56,9 @@ const show = (req, res) => {
         message: "Movie not found",
       });
     }
+
+    // Modifico la proprietà image aggiungendo l'url completa
+    movie.image = `${process.env.BE_URL}/movies/${movie.image}`;
 
     //query per recuperare le recensioni di quel film
     const reviewsSql = `
@@ -71,4 +81,27 @@ const show = (req, res) => {
   });
 };
 
-module.exports = { index, show };
+//Store review
+const storeReview = (req, res) => {
+  //recupero l'id dalla rotta
+  const { id } = req.params;
+
+  //recuperiamo il body della richiesta
+  const { name, vote, text } = req.body;
+  // preparare la query d'inserimento
+  const sql =
+    "INSERT INTO reviews(movie_id, name, vote, text) VALUES (?, ?, ?, ?)";
+  //eseguire la query
+  connection.execute(sql, [id, name, vote, text], (err, results) => {
+    if (err) {
+      return res.status(500).json({
+        error: "Query Error",
+        message: `Database query failed ${sql}`,
+      });
+    }
+    //restituire la risposta al client
+    res.status(201).json({ id: results.insertId });
+  });
+};
+
+module.exports = { index, show, storeReview };
